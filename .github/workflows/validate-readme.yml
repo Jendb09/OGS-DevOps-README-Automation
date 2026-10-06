@@ -1,0 +1,99 @@
+name: Update README Activity
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - OGS-16-update-readme
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.REPO_TOKEN }}
+          fetch-depth: 0
+
+      - name: Generate recent activity
+        env:
+          GH_TOKEN: ${{ secrets.REPO_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          token = os.environ["GH_TOKEN"]
+          repo = os.environ["REPOSITORY"]
+
+          request = urllib.request.Request(
+              f"https://api.github.com/repos/{repo}/commits?per_page=5",
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+
+          with urllib.request.urlopen(request) as response:
+              commits = json.load(response)
+
+          lines = ["### Latest Commits", ""]
+
+          for commit in commits:
+              message = commit["commit"]["message"].splitlines()[0]
+              author = commit["commit"]["author"]["name"]
+              sha = commit["sha"][:7]
+              url = commit["html_url"]
+              lines.append(f"- [`{sha}`]({url}) {message} — {author}")
+
+          activity = "\n".join(lines)
+
+          start_marker = "<!-- ACTIVITY:START -->"
+          end_marker = "<!-- ACTIVITY:END -->"
+
+          with open("README.md", "r", encoding="utf-8") as f:
+              readme = f.read()
+
+          if start_marker not in readme or end_marker not in readme:
+              raise SystemExit("Required README activity markers are missing.")
+
+          before, rest = readme.split(start_marker, 1)
+          _, after = rest.split(end_marker, 1)
+
+          updated = (
+              before
+              + start_marker
+              + "\n"
+              + activity
+              + "\n"
+              + end_marker
+              + after
+          )
+
+          with open("README.md", "w", encoding="utf-8") as f:
+              f.write(updated)
+          PY
+
+      - name: Commit README if changed
+        run: |
+          if git diff --quiet README.md; then
+            echo "README is already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add README.md
+          git commit -m "OGS-16 Auto-update README activity [skip ci]"
+          git push
