@@ -30,3 +30,4 @@ This project demonstrates:
 ## Security
 
 Authentication credentials are stored securely using GitHub Actions Secrets. Sensitive token values are never committed to the repository.
+CI validation and automated README updates are enabled for this repository.
