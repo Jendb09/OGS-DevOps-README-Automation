@@ -14,7 +14,7 @@ This repository is linked to Jira issue **OGS-16 — Automate README Activity Up
 - [`9433cbb`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/9433cbb00ea31f9ed55f285fbd456da08f4f5b9b) OGS-16 Add automatic README update workflow — Jendb09
 - [`833149b`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/833149bd887d88cddddb8e66a8cd731dcb14e448) OGS-16 Add automatic README update workflow — Jendb09
 - [`2dc9ea5`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/2dc9ea506154dfe9820ee29cb1ae62ef8fe9a86b) Initial commit — Jendb09
-
+<!-- ACTIVITY:END -->
 
 ## Automation
 
