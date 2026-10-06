@@ -1,0 +1,56 @@
+name: Validate README Markers
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - OGS-16-update-readme
+    paths:
+      - "README.md"
+      - ".github/workflows/validate-readme.yml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "README.md"
+      - ".github/workflows/validate-readme.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-readme:
+    name: Validate activity markers
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate README markers
+        run: |
+          echo "Checking README activity markers..."
+
+          if ! grep -Fq '<!-- ACTIVITY:START -->' README.md; then
+            echo "::error::Missing ACTIVITY:START marker in README.md"
+            exit 1
+          fi
+
+          if ! grep -Fq '<!-- ACTIVITY:END -->' README.md; then
+            echo "::error::Missing ACTIVITY:END marker in README.md"
+            exit 1
+          fi
+
+          START_LINE=$(grep -Fn '<!-- ACTIVITY:START -->' README.md | head -1 | cut -d: -f1)
+          END_LINE=$(grep -Fn '<!-- ACTIVITY:END -->' README.md | head -1 | cut -d: -f1)
+
+          if [ "$START_LINE" -ge "$END_LINE" ]; then
+            echo "::error::README activity markers are in the wrong order."
+            exit 1
+          fi
+
+          echo "README marker validation passed."
+          echo "START marker: line $START_LINE"
+          echo "END marker: line $END_LINE"
