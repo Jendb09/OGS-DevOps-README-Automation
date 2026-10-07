@@ -10,10 +10,11 @@ This repository is linked to Jira issue **OGS-16 — Automate README Activity Up
 <!-- ACTIVITY:START -->
 ### Latest Commits
 
-- [`d14dd98`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/d14dd981f70da6a2fe26b111a716038f89ca2c5c) Delete .github/workflows/validate-readme.yml — Jendb09
-- [`9433cbb`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/9433cbb00ea31f9ed55f285fbd456da08f4f5b9b) OGS-16 Add automatic README update workflow — Jendb09
-- [`833149b`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/833149bd887d88cddddb8e66a8cd731dcb14e448) OGS-16 Add automatic README update workflow — Jendb09
-- [`2dc9ea5`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/2dc9ea506154dfe9820ee29cb1ae62ef8fe9a86b) Initial commit — Jendb09
+- [`2ce84cf`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/2ce84cf5d85df76750923e040b4b97fc23877598) Merge pull request #1 from Jendb09/OGS-16-update-readme — Jendb09
+- [`2f37b11`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/2f37b113299b403c4c0526f22ef284ca1b5bf9a8) OGS-16 Verify restored README automation — Jendb09
+- [`ec09959`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/ec09959df397f5a54f62c7adcc359c049ea2d7e6) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
+- [`55a178a`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/55a178a5349d088a6935c166ec1deb4989b2a2a7) OGS-16 Restore README activity marker — Jendb09
+- [`e496a7b`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/e496a7ba0b94150ac6a2f86833867ab936ec4702) Update README.md — Jendb09
 <!-- ACTIVITY:END -->
 
 ## Automation
