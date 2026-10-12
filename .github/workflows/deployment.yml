@@ -38,3 +38,61 @@ jobs:
         with:
           name: build-artifact
           path: build.zip
+
+  deploy-dev:
+    name: Deploy Dev
+    needs: build
+    runs-on: ubuntu-latest
+    environment: dev
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+
+      - name: Create Dev Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ vars.BUILD_TAG }}
+          NOTE: ${{ vars.RELEASE_NOTE }}
+        run: |
+          gh release create "$TAG" build.zip \
+            --title "Development Release $TAG" \
+            --notes "Build Tag: $TAG
+
+          $NOTE" \
+            --prerelease \
+            --target "$GITHUB_SHA"
+
+  deploy-staging:
+    name: Deploy Staging
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+
+      - name: Create Staging Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ vars.BUILD_TAG }}
+          NOTE: ${{ vars.RELEASE_NOTE }}
+        run: |
+          gh release create "$TAG" build.zip \
+            --title "Staging Release $TAG" \
+            --notes "Build Tag: $TAG
+
+          $NOTE" \
+            --prerelease \
+            --target "$GITHUB_SHA"
