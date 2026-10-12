@@ -27,9 +27,13 @@ jobs:
       - name: Extract Version
         id: version
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Package version: $VERSION"
+          printf 'Build Tag: %s\n\n%s\n' "$TAG" "$NOTE" > release-notes.md
+
+          gh release create "$TAG" build.zip \
+            --title "Development Release $TAG" \
+            --notes-file release-notes.md \
+            --prerelease \
+            --target "$GITHUB_SHA"
 
       - name: Install Dependencies
         run: npm install --package-lock-only --ignore-scripts
@@ -67,20 +71,20 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          TAG: dev-v${{ github.run_number }}
+          TAG: dev-v${{ needs.build.outputs.version }}-run.${{ github.run_number }}
           NOTE: ${{ vars.RELEASE_NOTE }}
         run: |
-          gh release create "$TAG" build.zip \
-            --title "Development Release $TAG" \
-            --notes "Build Tag: $TAG
+          printf 'Build Tag: %s\n\n%s\n' "$TAG" "$NOTE" > release-notes.md
 
-          $NOTE" \
+          gh release create "$TAG" build.zip \
+            --title "Staging Release $TAG" \
+            --notes-file release-notes.md \
             --prerelease \
             --target "$GITHUB_SHA"
 
   deploy-staging:
     name: Deploy Staging
-    needs: deploy-dev
+    needs: [build, deploy-dev]
     runs-on: ubuntu-latest
     environment: staging
     permissions:
@@ -96,7 +100,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          TAG: staging-v${{ github.run_number }}
+          TAG: staging-v${{ needs.build.outputs.version }}-run.${{ github.run_number }}
           NOTE: ${{ vars.RELEASE_NOTE }}
         run: |
           gh release create "$TAG" build.zip \
@@ -109,7 +113,7 @@ jobs:
   
   deploy-production:
     name: Deploy Production
-    needs: deploy-staging
+    needs: [build, deploy-staging]
     runs-on: ubuntu-latest
     environment: production
     permissions:
@@ -125,14 +129,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          TAG: prod-v${{ github.run_number }}
+          TAG: prod-v${{ needs.build.outputs.version }}-run.${{ github.run_number }}
           NOTE: ${{ vars.RELEASE_NOTE }}
         run: |
+          printf 'Build Tag: %s\n\n%s\n' "$TAG" "$NOTE" > release-notes.md
+
           gh release create "$TAG" build.zip \
             --title "Production Release $TAG" \
-            --notes "Build Tag: $TAG
-
-          $NOTE" \
+            --notes-file release-notes.md \
             --latest \
             --target "$GITHUB_SHA"
 
