@@ -96,3 +96,33 @@ jobs:
           $NOTE" \
             --prerelease \
             --target "$GITHUB_SHA"
+  
+  deploy-production:
+    name: Deploy Production
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+
+      - name: Create Production Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ vars.BUILD_TAG }}
+          NOTE: ${{ vars.RELEASE_NOTE }}
+        run: |
+          gh release create "$TAG" build.zip \
+            --title "Production Release $TAG" \
+            --notes "Build Tag: $TAG
+
+          $NOTE" \
+            --latest \
+            --target "$GITHUB_SHA"
+
