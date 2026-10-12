@@ -72,10 +72,20 @@ const response = await fetch(
   }
 );
 
+
 if (!response.ok) {
-  console.error(
-    `OpenAI API request failed: HTTP ${response.status}`
-  );
+  const errorData = await response.json().catch(() => ({}));
+  const errorCode = errorData.error?.code ?? "unknown";
+
+  console.error(`OpenAI API HTTP ${response.status}`);
+  console.error(`Error code: ${errorCode}`);
+
+  if (errorCode === "insufficient_quota") {
+    console.error("Check API billing, credits, and usage limits.");
+  } else if (response.status === 429) {
+    console.error("Rate limit reached. Retry later.");
+  }
+
   process.exit(1);
 }
 
