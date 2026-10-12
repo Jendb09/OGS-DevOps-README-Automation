@@ -135,4 +135,33 @@ jobs:
             --notes-file release-notes.md \
             --latest \
             --target "$GITHUB_SHA"
+  ai-release-review:
+    name: AI Release Notes Agent
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: ai-review
+    permissions:
+      contents: read
 
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Generate AI Release Review
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node scripts/generate-release-notes.mjs
+
+      - name: Upload AI Review Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-release-review
+          path: ai-release-review.md
+          retention-days: 30
