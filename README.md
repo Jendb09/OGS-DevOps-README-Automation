@@ -10,11 +10,11 @@ This repository is linked to Jira issue **OGS-16 — Automate README Activity Up
 <!-- ACTIVITY:START -->
 ### Latest Commits
 
-- [`d86e041`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/d86e041d0c634df995fcf52e8d15bbe6a58a669e) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
-- [`a2fa0aa`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/a2fa0aad815e95b9128ae7edbf3cd22ebf2fe2a4) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
-- [`d06096c`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/d06096c1997cb778e09f923bc3f4072378e73820) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
-- [`33caf24`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/33caf24b9716b611410a9c2e020c61c3817ede38) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
-- [`07a1ac2`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/07a1ac275da5f928d6b3fb11c5a136c416606827) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
+- [`8b5c2f5`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/8b5c2f51cd933ddfa47f2cd4f826fb6081ff959a) Document human review of AI release notes run 7 — Jendb09
+- [`1ad73f9`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/1ad73f92c21de88d8d0b8241bd2e60f53d3dfdb5) Update generate-release-notes.mjs — Jendb09
+- [`3a32afb`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/3a32afb6e6f117f2ca9366d378a1005b1bcbca68) Integrate AI release review into deployment pipeline — Jendb09
+- [`ad3d344`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/ad3d344a55db967e9bb7bca5fbdfbc02c79c411e) Rename generate-release-notes.mjs to scripts/generate-release-notes.mjs — Jendb09
+- [`b0446f2`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/b0446f2030a1add7a257bb6a3ef570480bf6c418) Update deployment.yml — Jendb09
 <!-- ACTIVITY:END -->
 
 ## Automation
