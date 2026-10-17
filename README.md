@@ -10,11 +10,11 @@ This repository is linked to Jira issue **OGS-16 — Automate README Activity Up
 <!-- ACTIVITY:START -->
 ### Latest Commits
 
+- [`e63b603`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/e63b60312667a8bbb81edd39abbd11fa5925c64e) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
 - [`612d038`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/612d038d1e1e0f60db19b0a6b1bdad1da8502281) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
 - [`40e850f`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/40e850f96bdcb8e987db9552f6760a13afd05ccf) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
 - [`d8f8139`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/d8f813915f4caf7adfb933f9dde2b6461c10f927) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
 - [`20361c6`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/20361c601facf882773365035742dc57c387bfe9) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
-- [`e9798b5`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/e9798b56f6d4d94893d3c996c8863ee874938e53) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
 <!-- ACTIVITY:END -->
 
 ## Automation
