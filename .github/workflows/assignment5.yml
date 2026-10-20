@@ -1,0 +1,270 @@
+name: Assignment 5 - Automated Testing (O)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/assignment5.yml'
+      - 'package.json'
+      - 'scripts/**'
+      - 'tests/**'
+  workflow_dispatch:
+    inputs:
+      run_release:
+        description: 'Create Dev, Staging and Production GitHub Releases (production needs approval)'
+        type: boolean
+        required: true
+        default: false
+      simulate_failure:
+        description: 'Deliberately fail integration testing to verify skipped deployments'
+        type: boolean
+        required: true
+        default: false
+      coverage_threshold:
+        description: 'Minimum real application line coverage in percent (0 to 100)'
+        type: number
+        required: true
+        default: 80
+
+# Default jobs have read-only permissions; release jobs request write explicitly.
+permissions:
+  contents: read
+
+concurrency:
+  group: assignment5-${{ github.ref }}-${{ github.event_name }}-${{ github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: '01 | Build'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Read dynamic package version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Building v$VERSION"
+      - name: Build application
+        run: npm run build
+      - name: Package build artifact
+        run: zip -r build.zip dist/
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: assignment5-build
+          path: build.zip
+          if-no-files-found: error
+          retention-days: 30
+      - name: Build summary
+        run: |
+          echo '### Build completed' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Artifact: `assignment5-build` (`build.zip`)' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Version: `${{ steps.version.outputs.version }}`' >> "$GITHUB_STEP_SUMMARY"
+
+  test-unit:
+    name: '02 | Unit / Node ${{ matrix.node }}'
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    env:
+      TEST_ENV: staging
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Create report directory
+        run: mkdir -p reports
+      - name: Run unit tests and write JUnit XML
+        run: |
+          node --test \
+            --test-reporter=spec --test-reporter-destination=stdout \
+            --test-reporter=junit --test-reporter-destination=reports/unit.xml \
+            tests/build.test.js tests/build-metadata.test.js
+      - name: Generate real LCOV source coverage
+        run: |
+          node --test --experimental-test-coverage \
+            --test-coverage-include=scripts/build-metadata.js \
+            --test-reporter=spec --test-reporter-destination=stdout \
+            --test-reporter=lcov --test-reporter-destination=reports/lcov.info \
+            tests/build.test.js tests/build-metadata.test.js
+      - name: Enforce measured coverage threshold
+        id: coverage
+        run: node scripts/coverage-gate.js reports/lcov.info '${{ inputs.coverage_threshold || 80 }}'
+      - name: Print measurable unit-test summary
+        if: always()
+        run: node scripts/test-summary.js reports/unit.xml 'Unit tests - Node ${{ matrix.node }}'
+      - name: Upload unit test and coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assignment5-unit-node-${{ matrix.node }}
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 30
+
+  test-integration:
+    name: '03 | Integration / Artifact'
+    runs-on: ubuntu-latest
+    needs: [build, test-unit]
+    env:
+      TEST_ENV: staging
+      SIMULATE_TEST_FAILURE: ${{ inputs.simulate_failure && 'true' || 'false' }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Download exact build artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: assignment5-build
+      - name: Extract build artifact
+        run: unzip -o build.zip
+      - name: Create report directory
+        run: mkdir -p reports
+      - name: Run integration tests (intentional failure optional)
+        run: |
+          node --test \
+            --test-reporter=spec --test-reporter-destination=stdout \
+            --test-reporter=junit --test-reporter-destination=reports/integration.xml \
+            tests/integration-check.js
+      - name: Print measurable integration-test summary
+        if: always()
+        run: node scripts/test-summary.js reports/integration.xml 'Integration tests - staging'
+      - name: Upload integration test report even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assignment5-integration
+          path: reports/integration.xml
+          if-no-files-found: warn
+          retention-days: 30
+
+  deploy-dev:
+    name: '04 | Dev Release'
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_release == true }}
+    runs-on: ubuntu-latest
+    needs: [build, test-unit, test-integration]
+    environment: dev
+    permissions:
+      contents: write
+    env:
+      TEST_ENV: dev
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      TAG: a5-dev-v${{ needs.build.outputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: assignment5-build
+      - name: Create Dev GitHub Release
+        run: |
+          printf 'Environment: %s\nTest gate: unit + integration passed\nCommit: %s\n' "$TEST_ENV" "$GITHUB_SHA" > notes.txt
+          gh release create "$TAG" build.zip --target "$GITHUB_SHA" \
+            --title "Assignment 5 Dev $TAG" --notes-file notes.txt --prerelease
+
+  deploy-staging:
+    name: '05 | Staging Release'
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_release == true }}
+    runs-on: ubuntu-latest
+    needs: [build, deploy-dev]
+    environment: staging
+    permissions:
+      contents: write
+    env:
+      TEST_ENV: staging
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      TAG: a5-staging-v${{ needs.build.outputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: assignment5-build
+      - name: Create Staging GitHub Release
+        run: |
+          printf 'Environment: %s\nTest gate: unit + integration passed\nCommit: %s\n' "$TEST_ENV" "$GITHUB_SHA" > notes.txt
+          gh release create "$TAG" build.zip --target "$GITHUB_SHA" \
+            --title "Assignment 5 Staging $TAG" --notes-file notes.txt --prerelease
+
+  deploy-production:
+    name: '06 | Production / Required Approval'
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_release == true }}
+    runs-on: ubuntu-latest
+    needs: [build, test-unit, test-integration, deploy-staging]
+    # Create a Required reviewers protection rule in Settings > Environments.
+    # Naming the environment here alone DOES NOT enforce human approval.
+    environment: production
+    permissions:
+      contents: write
+    env:
+      TEST_ENV: prod
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      TAG: a5-prod-v${{ needs.build.outputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: assignment5-build
+      - name: Create approved Production GitHub Release
+        run: |
+          printf 'Environment: %s\nTest gate: unit + integration passed\nProduction: environment review required\nCommit: %s\n' "$TEST_ENV" "$GITHUB_SHA" > notes.txt
+          gh release create "$TAG" build.zip --target "$GITHUB_SHA" \
+            --title "Assignment 5 Production $TAG" --notes-file notes.txt --latest
+
+  evidence-summary:
+    name: '07 | Evidence Summary'
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    needs: [build, test-unit, test-integration, deploy-dev, deploy-staging, deploy-production]
+    permissions:
+      contents: read
+    steps:
+      - name: Summarize job decisions
+        env:
+          BUILD: ${{ needs.build.result }}
+          UNIT: ${{ needs.test-unit.result }}
+          INTEGRATION: ${{ needs.test-integration.result }}
+          DEV: ${{ needs.deploy-dev.result }}
+          STAGING: ${{ needs.deploy-staging.result }}
+          PRODUCTION: ${{ needs.deploy-production.result }}
+        run: |
+          {
+            echo '## Assignment 5 - Automated Testing Evidence'
+            echo ''
+            echo '| Pipeline stage | GitHub result |'
+            echo '|---|---|'
+            echo "| Build | $BUILD |"
+            echo "| Unit matrix (Node 22 + 24) | $UNIT |"
+            echo "| Integration tests | $INTEGRATION |"
+            echo "| Dev release | $DEV |"
+            echo "| Staging release | $STAGING |"
+            echo "| Production release | $PRODUCTION |"
+            echo ''
+            echo "- Workflow run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo '- JUnit and real LCOV files are downloadable in **Artifacts**.'
+            echo '- A failed test MUST produce skipped downstream release jobs.'
+            echo '- Skipped deployments on push or run_release=false are expected and are not proof of a failed test gate.'
+          } >> "$GITHUB_STEP_SUMMARY"
