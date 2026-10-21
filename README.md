@@ -10,11 +10,11 @@ This repository is linked to Jira issue **OGS-16 — Automate README Activity Up
 <!-- ACTIVITY:START -->
 ### Latest Commits
 
-- [`1f282fc`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/1f282fcff8ea5337ad29da6ff51be67dd6dd9e63) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
-- [`d69ad31`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/d69ad31f7238cc7d5e7caa079c32aaf7c610b10b) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
-- [`7ee722e`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/7ee722e215f42db82533d08e5cb80b655410b25f) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
-- [`d6a35f6`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/d6a35f6d4fe9299b2f842784100ee970b14e9239) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
-- [`10ca2b4`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/10ca2b4b782963b177fa91020bcb075cfd44d730) OGS-16 Auto-update README activity [skip ci] — github-actions[bot]
+- [`d4c1bd2`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/d4c1bd24534712c767afcf2a459e676254aba319) Assignment 5: Add automated testing CI/CD workflow — Jendb09
+- [`0af9288`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/0af9288aded0d9860e4f8d429a591c7538badb9b) Assignment 5: Add unit and integration tests — Jendb09
+- [`c58bb33`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/c58bb33679b5fd5d900c47dacfa51c3be57a1445) Add files via upload — Jendb09
+- [`13ad5e2`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/13ad5e237b49368c761ad7f40723e611cec8eb61) Assignment 5: Add Node.js test configuration — Jendb09
+- [`55abcc6`](https://github.com/Jendb09/OGS-DevOps-README-Automation/commit/55abcc6dfcd99db2faec7576e83726442e0b3f0a) Delete test-summary.js — Jendb09
 <!-- ACTIVITY:END -->
 
 ## Automation
